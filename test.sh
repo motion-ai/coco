@@ -24,26 +24,26 @@ j=0; jq -c '.entity[]' ${LABELS} | while read; do
   label=$(echo "${REPLY}" | jq -r '.label[].en')
 
   if [ ${j:-0} -gt 0 ]; then echo ',' >> ${out}; fi
-  echo '{"label":"'${label}'","isa":[' >> ${out}
+  echo -n '{"label":"'${label}'","isa":[' >> ${out}
 
   i=0; for c in $(echo "${isa}" | jq -r '.[]'); do
     if [ ${i:-0} -gt 0 ]; then echo -n ',' >> ${out}; fi
-    echo '{"id":"'${c}'","label":' >> ${out}
+    echo -n '{"id":"'${c}'","label":' >> ${out}
     class=$(jq '.isa[]|select(.id=="'${c}'")' labels.json)
     if [ ! -z "${class:-}" ]; then
       n=$(echo "${class}" | jq '.label[].en')
       ci=$(egrep "${label}"'$' ${DOCS} | awk -F': ' '{ print $1 }')
       cs=$(egrep "${label}"'$' ${DOCS} | awk -F': ' '{ print $2 }')
-      echo ${n} >> ${out}
+      echo -n ${n} >> ${out}
     else
-      echo 'null' >> ${out}
+      echo -n 'null' >> ${out}
       echo "LABEL: ${label}; ISA: ${c}; NOT FOUND" &> /dev/stderr
     fi
     i=$((i+1))
-    echo '}' >> ${out}
+    echo -n '}' >> ${out}
   done
-  echo '],"stuff":{"id":"'${ci:-not found}'","label":"'${cs:-not found}'"}}' >> ${out}
+  echo -n '],"stuff":{"id":"'${ci:-not found}'","label":"'${cs:-not found}'"}}' >> ${out}
   j=$((j+1))
 done
 echo ']}' >> ${out}
-jq -c '.' ${out}
+cat ${out}
