@@ -1,3 +1,5 @@
+<img src="docs/coco.png" width="640">
+
 # `coco` - metadata for [COCO](https://cocodataset.org)
 
 ## `labels.json`
